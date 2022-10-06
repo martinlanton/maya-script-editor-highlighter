@@ -1,0 +1,7 @@
+*.tox/
+*.pyc
+*.idea/
+/MayaPipe/other/
+*.coverage
+cov_html/
+venv
