@@ -3,6 +3,11 @@ import shiboken2
 from PySide2 import QtCore, QtGui, QtWidgets
 import logging
 
+
+def maya_useNewAPI():  # noqa
+    pass  # dummy method to tell Maya this plugin uses Maya Python API 2.0
+
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -146,9 +151,18 @@ def __on_focus_changed(old_widget, new_widget):
             __qt_focus_change_callback[callback]()
 
 
-try:
-    app = QtWidgets.QApplication.instance()
-    app.focusChanged.connect(__on_focus_changed)
-    __se_highlight()
-except Exception as exp:
-    pass
+def setup_highlighter():
+    try:
+        app = QtWidgets.QApplication.instance()
+        app.focusChanged.connect(__on_focus_changed)
+        __se_highlight()
+    except Exception as exp:
+        pass
+
+
+def initializePlugin(plugin):
+    setup_highlighter()
+
+
+def uninitializePlugin(plugin):
+    ...# todo
