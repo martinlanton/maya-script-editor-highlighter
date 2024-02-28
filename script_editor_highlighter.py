@@ -1,4 +1,4 @@
-from maya import OpenMayaUI
+from maya import OpenMayaUI, cmds
 import shiboken2
 import logging
 try:
@@ -169,7 +169,7 @@ def setup_highlighter():
 
 
 def initializePlugin(plugin):
-    setup_highlighter()
+    cmds.evalDeferred(setup_highlighter)
 
 
 def uninitializePlugin(plugin):
