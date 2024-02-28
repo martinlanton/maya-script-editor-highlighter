@@ -75,6 +75,7 @@ class StdOut_Syntax(QtGui.QSyntaxHighlighter):
     kOrange = QtGui.QColor(255, 160, 0)
     kGreen = QtGui.QColor(35, 170, 30)
     kBlue = QtGui.QColor(35, 160, 255)
+    kLightBlue = QtGui.QColor(70, 200, 255)
 
     rx_error = QtCore.QRegExp(r"[Ee][Rr][Rr][Oo][Rr]")
     error_format = QtGui.QTextCharFormat()
@@ -85,6 +86,10 @@ class StdOut_Syntax(QtGui.QSyntaxHighlighter):
     warning_format.setForeground(kOrange)
 
     rx_debug = QtCore.QRegExp(r"[Dd][Ee][Bb][Uu][Gg]")
+    debug_format = QtGui.QTextCharFormat()
+    debug_format.setForeground(kLightBlue)
+
+    rx_debug = QtCore.QRegExp(r"[Ss][Uu][Cc][Cc][Ee][Ss]")
     debug_format = QtGui.QTextCharFormat()
     debug_format.setForeground(kGreen)
 
