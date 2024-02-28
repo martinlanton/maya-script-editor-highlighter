@@ -1,6 +1,0 @@
-[report]
-exclude_lines =
-    pragma: no cover
-    # TODO
-    pass
-    raise NotImplementedError
