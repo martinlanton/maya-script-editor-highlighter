@@ -3,7 +3,7 @@ This plugin lets you easily see errors and warnings in the Maya console.
 it's quite primitive, e.g. the line `// https://www.autodesk.com/maya-arnold-not-available-error` will be colored as an error  
 
 ### install
-1. copy the script in your plugins folder
+1. copy the script in your plugins folder `%UserProfile%\Documents\Maya\plug-ins`
 2. enable the highlight plugin
 3. open script editor.
 4. it wont work untill you go out of focus, so click on the viewport then back on the editor.
