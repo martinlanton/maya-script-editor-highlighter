@@ -6,11 +6,10 @@ it's quite simple, e.g. the line `// https://www.autodesk.com/maya-arnold-not-av
 You can use either of the following installation methods
 
 #### Plug-in version
-* Copy the `script_editor_highlighter.py` in your plugins folder `%UserProfile%\Documents\Maya\plug-ins` OR
-* Edit your environment variables to add the plug-in folder to your list of plugin locations. This can be done by adding the location of the plug-ins folder location (for example `C:\Users\JohnDoe\Documents\maya_script_editor_highlighter\src\plug-ins`, or wherever you decided to put it) to the `MAYA_PLUG_IN_PATH` environment variable.
+* Edit your environment variables to add the `plug-ins` folder to your list of plugin locations. This can be done by adding the `plug-ins` folder location (for example `C:\Users\JohnDoe\Documents\maya_script_editor_highlighter\src\plug-ins`, or wherever you decided to put it) to the `MAYA_PLUG_IN_PATH` environment variable.
 
 #### userSetup.py version
-* Add the `script` folder location (for example `C:\Users\JohnDoe\Documents\maya_script_editor_highlighter\src\scripts`, or wherever you decided to put it) to the `PYTHONPATH` environment variable.
+* Edit your environment variables to add the `scripts` folder to your list of scripts locations. This can be done by adding the `scripts` folder location (for example `C:\Users\JohnDoe\Documents\maya_script_editor_highlighter\src\scripts`, or wherever you decided to put it) to the `PYTHONPATH` environment variable.
 
 ### Usage
 1. Enable the highlight plugin (if you chose the plug-in version)
