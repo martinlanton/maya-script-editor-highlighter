@@ -68,7 +68,7 @@ class StdOut_Syntax(QtGui.QSyntaxHighlighter):
         return (
             self.previousBlockState() == self.normal
             and self.rx_traceback_start.indexIn(t) > 0
-        ) or (self.previousBlockState() == self.traceback and t.startswith("#   "))
+        ) or (self.previousBlockState() == self.traceback and (t.startswith("#   ") or t.startswith("# # ")))
 
 
 def __se_highlight():
