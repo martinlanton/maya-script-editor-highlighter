@@ -73,7 +73,7 @@ class StdOut_Syntax(QtGui.QSyntaxHighlighter):
     kWhite = QtGui.QColor(200, 200, 200)
     kRed = QtGui.QColor(255, 0, 0)
     kOrange = QtGui.QColor(255, 160, 0)
-    kGreen = QtGui.QColor(35, 170, 30)
+    kGreen = QtGui.QColor(16, 255, 8)
     kBlue = QtGui.QColor(35, 160, 255)
     kLightBlue = QtGui.QColor(70, 200, 255)
 
