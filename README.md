@@ -1,22 +1,19 @@
-# maya_template_project
-Template project for maya code, including unittest setup
+This plugin lets you easily see errors and warnings in the Maya console.  
+![image](https://github.com/hannesdelbeke/maya_script_editor_highlighter/assets/3758308/4f15a866-1d87-45a5-9cf6-e779a4bf17ee)  
+it's quite primitive, e.g. the line `// https://www.autodesk.com/maya-arnold-not-available-error` will be colored as an error  
 
-## How to install pytest on Maya?
+### install
+* Copy the `script_editor_highlighter.py` in your plugins folder `%UserProfile%\Documents\Maya\plug-ins` OR
+* Edit your environment variables to add the plug-in folder to your list of plugin locations. This can be done by adding the location of the plug-ins folder location (for example `C:\Users\JohnDoe\Documents\maya_script_editor_highlighter\src\plug-ins`, or wherever you decided to put it) to the `MAYA_PLUG_IN_PATH` environment variable.
 
-Pytest can be installed on maya following [this documentation](https://knowledge.autodesk.com/support/maya/downloads/caas/CloudHelp/cloudhelp/2022/ENU/Maya-Scripting/files/GUID-72A245EC-CDB4-46AB-BEE0-4BBBF9791627-htm.html).
+#### Alternatively, you can use the userSetup.py version
+* Add the `script` folder location (for example `C:\Users\JohnDoe\Documents\maya_script_editor_highlighter\src\scripts`, or wherever you decided to put it) to the `PYTHONPATH` environment variable.
 
-###In short, on Windows, from an ***administrator*** command line :
-```commandline
-mayapy -m pip install <flags> <package>
-```
-###Which could translate to this :
-```commandline
-mayapy -m pip install --ignore-installed pytest
-```
-The ignore install flag is a nice thing to know when you want to ensure you get the latest version or when the package in question is already installed somewhere else.
+### Usage
+1. Enable the highlight plugin (if you chose the plug-in version)
+2. Open script editor.
+3. It won't work until you get focus on the script editor, this means you'll need to activate focus on a different part of the GUI, then back on the script editor. To do this, simply click on the viewport then back on the script editor.
 
 
-###On both macOS and Linux, the following command can be used :
-```commandline
-sudo ./mayapy -m pip install <flags> <package>
-```
+### reference
+see https://hannesdelbeke.github.io/wiki/tech%20art/maya/Maya%20script%20editor%20syntax%20highlight/
