@@ -1,71 +1,15 @@
+import logging
+
 from maya import OpenMayaUI
 import shiboken2
-import logging
 try:
     from PySide2 import QtCore, QtGui, QtWidgets
 except ImportError:
     from PySide6 import QtCore, QtGui, QtWidgets
 
 
-def maya_useNewAPI():  # noqa
-    pass  # dummy method to tell Maya this plugin uses Maya Python API 2.0
-
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
-
-# TODO : finish implementing python keyword highlighting in stack traces
-class PythonSyntaxRules(object):
-    keywords = [
-        "False",
-        "await",
-        "else",
-        "import",
-        "pass",
-        "None",
-        "break",
-        "except",
-        "in",
-        "raise",
-        "True",
-        "class",
-        "finally",
-        "is",
-        "return",
-        "and",
-        "continue",
-        "for",
-        "lambda",
-        "try",
-        "as",
-        "def",
-        "from",
-        "nonlocal",
-        "while",
-        "assert",
-        "del",
-        "global",
-        "not",
-        "with",
-        "async",
-        "elif",
-        "if",
-        "or",
-        "yield",
-    ]
-
-    kOrange = QtGui.QColor(255, 80, 0)
-
-    keyword_format = QtGui.QTextCharFormat()
-    keyword_format.setForeground(kOrange)
-
-    Rules = []
-    # For some reason this doesn't work as a list comprehension and yields an "undefined" for
-    # keyword format in the following list comprehension :
-    # Rules = [(QtCore.QRegExp(r"((\s){}(\s))".format(keyword)), keyword_format) for keyword in keywords]
-    for keyword in keywords:
-        Rules.append((QtCore.QRegExp(r"((\s){}(\s))".format(keyword)), keyword_format))
 
 
 class StdOut_Syntax(QtGui.QSyntaxHighlighter):
@@ -146,6 +90,11 @@ __qt_focus_change_callback = {"cmdScrollFieldReporter": __se_highlight}
 
 
 def __on_focus_changed(old_widget, new_widget):
+    """Enable the highlighter when changing focus to the script editor.
+
+    :param old_widget: previously focused widget. Argument passed by the signal triggering this.
+    :param new_widget: currently focused widget. Argument passed by the signal triggering this.
+    """
     if new_widget:
         widget_name = new_widget.objectName()
         for callback in [
@@ -161,11 +110,3 @@ def setup_highlighter():
         __se_highlight()
     except Exception as exp:
         pass
-
-
-def initializePlugin(plugin):
-    setup_highlighter()
-
-
-def uninitializePlugin(plugin):
-    ...# todo
