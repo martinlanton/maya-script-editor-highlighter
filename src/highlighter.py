@@ -2,6 +2,7 @@ import logging
 
 from maya import OpenMayaUI
 import shiboken2
+
 try:
     from PySide2 import QtCore, QtGui, QtWidgets
 except ImportError:
@@ -13,7 +14,6 @@ logger.setLevel(logging.INFO)
 
 
 class StdOut_Syntax(QtGui.QSyntaxHighlighter):
-
     kWhite = QtGui.QColor(200, 200, 200)
     kRed = QtGui.QColor(255, 0, 0)
     kOrange = QtGui.QColor(255, 160, 0)
@@ -55,6 +55,9 @@ class StdOut_Syntax(QtGui.QSyntaxHighlighter):
         if self.isTraceback(t):
             self.setFormat(0, len(t), self.traceback_format)
             self.setCurrentBlockState(self.traceback)
+        elif self.isPySideError(t):
+            self.setFormat(0, len(t), self.error_format)
+            self.setCurrentBlockState(self.traceback)
         else:
             self.line_formatting(t)
 
@@ -68,7 +71,13 @@ class StdOut_Syntax(QtGui.QSyntaxHighlighter):
         return (
             self.previousBlockState() == self.normal
             and self.rx_traceback_start.indexIn(t) > 0
-        ) or (self.previousBlockState() == self.traceback and (t.startswith("#   ") or t.startswith("# # ")))
+        ) or (
+            self.previousBlockState() == self.traceback
+            and (t.startswith("#   ") or t.startswith("# # "))
+        )
+
+    def isPySideError(self, t):
+        return t.startswith("# Error") or t.startswith("# TypeError")
 
 
 def __se_highlight():
@@ -76,10 +85,14 @@ def __se_highlight():
     i = 1
     while True:
         script_editor_output_name = "cmdScrollFieldReporter{0}".format(i)
-        script_editor_output_object = OpenMayaUI.MQtUtil.findControl(script_editor_output_name)
+        script_editor_output_object = OpenMayaUI.MQtUtil.findControl(
+            script_editor_output_name
+        )
         if not script_editor_output_object:
             break
-        script_editor_output_widget = shiboken2.wrapInstance(int(script_editor_output_object), QtWidgets.QTextEdit)
+        script_editor_output_widget = shiboken2.wrapInstance(
+            int(script_editor_output_object), QtWidgets.QTextEdit
+        )
         logger.debug(script_editor_output_widget)
         StdOut_Syntax(script_editor_output_widget.document())
         logger.debug("Done attaching highlighter to : %s" % script_editor_output_widget)
