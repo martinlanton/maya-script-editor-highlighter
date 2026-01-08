@@ -48,4 +48,4 @@ class PythonSyntaxRules(object):
     # keyword format in the following list comprehension :
     # Rules = [(QtCore.QRegExp(r"((\s){}(\s))".format(keyword)), keyword_format) for keyword in keywords]
     for keyword in keywords:
-        Rules.append((QtCore.QRegExp(r"((\s){}(\s))".format(keyword)), keyword_format))
+        Rules.append((QtCore.QRegularExpression(fr"\b{keyword}\b"), keyword_format))
