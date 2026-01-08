@@ -1,13 +1,12 @@
 import logging
 
 from maya import OpenMayaUI
-import shiboken2
-
 try:
-    from PySide2 import QtCore, QtGui, QtWidgets
-except ImportError:
+    from shiboken6 import wrapInstance
     from PySide6 import QtCore, QtGui, QtWidgets
-
+except (ImportError, ModuleNotFoundError):
+    from shiboken2 import wrapInstance
+    from PySide2 import QtCore, QtGui, QtWidgets
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -20,15 +19,15 @@ class StdOut_Syntax(QtGui.QSyntaxHighlighter):
     kGreen = QtGui.QColor(35, 170, 30)
     kBlue = QtGui.QColor(35, 160, 255)
 
-    rx_error = QtCore.QRegExp(r"[Ee][Rr][Rr][Oo][Rr]")
+    rx_error = QtCore.QRegularExpression(r"error", QtCore.QRegularExpression.PatternOption.CaseInsensitiveOption)
     error_format = QtGui.QTextCharFormat()
     error_format.setForeground(kRed)
 
-    rx_warning = QtCore.QRegExp(r"[Ww][Aa][Rr][Nn][Ii][Nn][Gg]")
+    rx_warning = QtCore.QRegularExpression(r"warning", QtCore.QRegularExpression.PatternOption.CaseInsensitiveOption)
     warning_format = QtGui.QTextCharFormat()
     warning_format.setForeground(kOrange)
 
-    rx_debug = QtCore.QRegExp(r"[Dd][Ee][Bb][Uu][Gg]")
+    rx_debug = QtCore.QRegularExpression(r"debug", QtCore.QRegularExpression.PatternOption.CaseInsensitiveOption)
     debug_format = QtGui.QTextCharFormat()
     debug_format.setForeground(kGreen)
 
@@ -46,8 +45,7 @@ class StdOut_Syntax(QtGui.QSyntaxHighlighter):
     ]
 
     def __init__(self, parent):
-        super(StdOut_Syntax, self).__init__(parent)
-        self.parent = parent
+        super().__init__(parent)
         self.normal, self.traceback = range(2)
 
     def highlightBlock(self, t):
@@ -63,18 +61,18 @@ class StdOut_Syntax(QtGui.QSyntaxHighlighter):
 
     def line_formatting(self, t):
         for regex, formatting in StdOut_Syntax.Rules:
-            i = regex.indexIn(t)
-            if i > 0:
+            match = regex.match(t)
+            if match.hasMatch():
                 self.setFormat(0, len(t), formatting)
 
     def isTraceback(self, t):
-        return (
-            self.previousBlockState() == self.normal
-            and self.rx_traceback_start.indexIn(t) > 0
-        ) or (
-            self.previousBlockState() == self.traceback
-            and (t.startswith("#   ") or t.startswith("# # "))
-        )
+        match = self.rx_traceback_start.match(t)
+        prev_state = self.previousBlockState()
+
+        is_start = prev_state == self.normal and match.hasMatch()
+        is_cont = prev_state == self.traceback and t.startswith("#   ")
+
+        return is_start or is_cont
 
     def isPySideError(self, t):
         return t.startswith("# Error") or t.startswith("# TypeError")
@@ -90,7 +88,7 @@ def __se_highlight():
         )
         if not script_editor_output_object:
             break
-        script_editor_output_widget = shiboken2.wrapInstance(
+        script_editor_output_widget = wrapInstance(
             int(script_editor_output_object), QtWidgets.QTextEdit
         )
         logger.debug(script_editor_output_widget)
