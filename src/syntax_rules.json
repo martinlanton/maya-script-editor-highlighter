@@ -1,0 +1,52 @@
+{
+    "info": {
+        "pattern": ".*(info|INFO|NOTE).*$",
+        "color": "#87cefa"
+    },
+    "debug": {
+        "pattern": ".*(debug|DEBUG).*$",
+        "color": "#ce6bfd"
+    },
+    "warning": {
+        "pattern": ".*(warning|WARNING|Warning).*$",
+        "color": "#ffaf2c"
+    },
+    "error": {
+        "pattern": ".*(error|ERROR|Error).*$",
+        "color": "#f08080",
+        "background_color": ""
+    },
+    "critical": {
+        "pattern": ".*(critical|CRITICAL|Critical).*$",
+        "color": "#2a2a2a",
+        "background_color": "#f08080"
+    },
+    "failure": {
+        "pattern": ".*(failure|FAILURE|Failure).*$",
+        "color": "#2a2a2a",
+        "background_color": "#f08080"
+    },
+    "windows_path": {
+        "pattern": "[A-Za-z]:[/\\\\][^\\s:*?\"<>|]+\\.[a-zA-Z0-9]+(?=\\s|$)",
+        "color": "#00bfff",
+        "underline": true
+    },
+    "line_number": {
+        "pattern": "line\\s+\\d+",
+        "color": "deeppink",
+        "underline": true
+    },
+    "highlight": {
+        "pattern": "\\*.*",
+        "color": "lightgreen"
+    },
+    "traceback_start": {
+        "pattern": "^# Traceback \\(most recent call last\\):.*$",
+        "color": "#CC4200",
+        "multiline": true
+    },
+    "qt_error": {
+        "pattern": "^# (Error|TypeError):.*$",
+        "color": "#CC0016"
+    }
+}

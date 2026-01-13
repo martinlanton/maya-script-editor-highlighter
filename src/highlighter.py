@@ -1,12 +1,13 @@
 import logging
 
-from maya import OpenMayaUI
-import shiboken2
-
 try:
-    from PySide2 import QtCore, QtGui, QtWidgets
+    from PySide2 import QtGui, QtWidgets
 except ImportError:
-    from PySide6 import QtCore, QtGui, QtWidgets
+    from PySide6 import QtGui, QtWidgets
+
+from .syntax_rules import SyntaxRule
+from .link_filter import LinkFilter
+from . import constants, utils
 
 
 logger = logging.getLogger(__name__)
@@ -14,89 +15,101 @@ logger.setLevel(logging.INFO)
 
 
 class StdOut_Syntax(QtGui.QSyntaxHighlighter):
-    kWhite = QtGui.QColor(200, 200, 200)
-    kRed = QtGui.QColor(255, 0, 0)
-    kOrange = QtGui.QColor(255, 160, 0)
-    kGreen = QtGui.QColor(35, 170, 30)
-    kBlue = QtGui.QColor(35, 160, 255)
 
-    rx_error = QtCore.QRegExp(r"[Ee][Rr][Rr][Oo][Rr]")
-    error_format = QtGui.QTextCharFormat()
-    error_format.setForeground(kRed)
-
-    rx_warning = QtCore.QRegExp(r"[Ww][Aa][Rr][Nn][Ii][Nn][Gg]")
-    warning_format = QtGui.QTextCharFormat()
-    warning_format.setForeground(kOrange)
-
-    rx_debug = QtCore.QRegExp(r"[Dd][Ee][Bb][Uu][Gg]")
-    debug_format = QtGui.QTextCharFormat()
-    debug_format.setForeground(kGreen)
-
-    rx_traceback_start = QtCore.QRegExp("Traceback \(most recent call last\)")
-    traceback_format = QtGui.QTextCharFormat()
-    traceback_format.setForeground(kBlue)
-
-    default_format = QtGui.QTextCharFormat()
-    default_format.setForeground(kWhite)
-
-    Rules = [
-        (rx_debug, debug_format),
-        (rx_warning, warning_format),
-        (rx_error, error_format),
-    ]
-
-    def __init__(self, parent):
-        super(StdOut_Syntax, self).__init__(parent)
-        self.parent = parent
+    def __init__(self, rules: list, document: QtGui.QTextDocument):
+        super().__init__(document)
+        self.rules = rules
+        self._highlight_func = self.__old if constants.IS_OLD_MAYA else self.__new
         self.normal, self.traceback = range(2)
 
-    def highlightBlock(self, t):
-        self.setCurrentBlockState(self.normal)
-        if self.isTraceback(t):
-            self.setFormat(0, len(t), self.traceback_format)
-            self.setCurrentBlockState(self.traceback)
-        elif self.isPySideError(t):
-            self.setFormat(0, len(t), self.error_format)
-            self.setCurrentBlockState(self.traceback)
+        self.traceback_rule = None
+        for rule in self.rules:
+            if rule.multiline:
+                self.traceback_rule = rule
+                break
+
+    def highlightBlock(self, text: str):
+        previous_state = self.previousBlockState()
+    
+        # Handle multiline traceback
+        if self.traceback_rule:
+            if self._matches_pattern(self.traceback_rule.pattern, text):
+                self.setCurrentBlockState(self.traceback)
+                self.setFormat(0, len(text), self.traceback_rule.format)
+                return
+
+            if previous_state == self.traceback:
+                stripped = text.strip()
+                if stripped == '' or stripped == '#':
+                    self.setCurrentBlockState(self.traceback)
+                    return
+                elif text.startswith(('#  ', '# \t', '# File')) or self._is_exception_line(text):
+                    self.setCurrentBlockState(self.traceback)
+                    self.setFormat(0, len(text), self.traceback_rule.format)
+                    return
+                else:
+                    self.setCurrentBlockState(self.normal)
+
+        # Apply other rules
+        for rule in self.rules:
+            if not rule.multiline:
+                self._highlight_func(rule, text)
+        
+        if self.currentBlockState() == -1:
+            self.setCurrentBlockState(self.normal)
+    
+    def _matches_pattern(self, pattern, text: str) -> bool:
+        if constants.IS_OLD_MAYA:
+            return pattern.indexIn(text) == 0
         else:
-            self.line_formatting(t)
+            match = pattern.match(text)
+            return match.hasMatch() and match.capturedStart() == 0
+    
+    def _is_exception_line(self, text: str) -> bool:
+        stripped = text.strip()
+        if not stripped:
+            return False
+        
+        if stripped.startswith('# '):
+            stripped = stripped[2:].strip()
 
-    def line_formatting(self, t):
-        for regex, formatting in StdOut_Syntax.Rules:
-            i = regex.indexIn(t)
-            if i > 0:
-                self.setFormat(0, len(t), formatting)
+        if ':' in stripped:
+            before_colon = stripped.split(':')[0].strip()
+            return (before_colon and 
+                    before_colon[0].isupper() and 
+                    ('Error' in before_colon or 'Exception' in before_colon or before_colon == 'Error'))
 
-    def isTraceback(self, t):
-        return (
-            self.previousBlockState() == self.normal
-            and self.rx_traceback_start.indexIn(t) > 0
-        ) or (
-            self.previousBlockState() == self.traceback
-            and (t.startswith("#   ") or t.startswith("# # "))
-        )
+        return stripped and stripped[0].isupper() and '(' in stripped
 
-    def isPySideError(self, t):
-        return t.startswith("# Error") or t.startswith("# TypeError")
+    def __old(self, rule: SyntaxRule, text: str):
+        index = rule.pattern.indexIn(text)
+        while index >= 0:
+            length = rule.pattern.matchedLength()
+            self.setFormat(index, length, rule.format)
+            index = rule.pattern.indexIn(text, index + length)
+
+    def __new(self, rule: SyntaxRule, text: str):
+        iterator = rule.pattern.globalMatch(text)
+        while iterator.hasNext():
+            match = iterator.next()
+            index = match.capturedStart()
+            length = match.capturedLength()
+            self.setFormat(index, length, rule.format)
 
 
 def __se_highlight():
     logger.debug("Attaching highlighter")
-    i = 1
-    while True:
-        script_editor_output_name = "cmdScrollFieldReporter{0}".format(i)
-        script_editor_output_object = OpenMayaUI.MQtUtil.findControl(
-            script_editor_output_name
-        )
-        if not script_editor_output_object:
-            break
-        script_editor_output_widget = shiboken2.wrapInstance(
-            int(script_editor_output_object), QtWidgets.QTextEdit
-        )
-        logger.debug(script_editor_output_widget)
-        StdOut_Syntax(script_editor_output_widget.document())
-        logger.debug("Done attaching highlighter to : %s" % script_editor_output_widget)
-        i += 1
+    script_editor_output_widget = utils.script_editor_output_widget()
+    if not script_editor_output_widget:
+        return
+    logger.debug(script_editor_output_widget)
+    StdOut_Syntax(SyntaxRule.get_rules(), script_editor_output_widget.document())
+    instance = LinkFilter.instance
+    if not instance:
+        event_filter = LinkFilter()
+        script_editor_output_widget.installEventFilter(event_filter)
+        LinkFilter.instance = event_filter
+    logger.debug("Done attaching highlighter to : %s" % script_editor_output_widget)
 
 
 __qt_focus_change_callback = {"cmdScrollFieldReporter": __se_highlight}
@@ -110,9 +123,8 @@ def __on_focus_changed(old_widget, new_widget):
     """
     if new_widget:
         widget_name = new_widget.objectName()
-        for callback in [
-            name for name in __qt_focus_change_callback if widget_name.startswith(name)
-        ]:
+        cbs = [name for name in __qt_focus_change_callback if widget_name.startswith(name)]
+        for callback in cbs:
             __qt_focus_change_callback[callback]()
 
 
