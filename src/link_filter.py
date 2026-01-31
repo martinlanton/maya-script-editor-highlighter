@@ -3,7 +3,8 @@ try:
 except:
     from PySide6 import QtCore, QtGui
 
-from . import constants, utils
+import constants
+import utils
 
 
 class LinkFilter(QtCore.QObject):

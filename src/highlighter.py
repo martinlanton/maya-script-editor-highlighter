@@ -5,9 +5,10 @@ try:
 except ImportError:
     from PySide6 import QtGui, QtWidgets
 
-from .syntax_rules import SyntaxRule
-from .link_filter import LinkFilter
-from . import constants, utils
+from syntax_rules import SyntaxRule
+from link_filter import LinkFilter
+import constants
+import utils
 
 
 logger = logging.getLogger(__name__)

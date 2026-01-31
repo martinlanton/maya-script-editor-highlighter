@@ -16,7 +16,7 @@ except:
 
 from maya import OpenMayaUI as omui
 
-from . import constants
+import constants
 
 
 logger = logging.getLogger("SCRIPT EDITOR HIGHLIGHTER")

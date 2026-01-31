@@ -8,7 +8,8 @@ except:
     from PySide6 import QtGui
     from PySide6.QtCore import QRegularExpression as QRegExp
 
-from . import constants, utils
+import constants
+import utils
 
 
 @dataclass
